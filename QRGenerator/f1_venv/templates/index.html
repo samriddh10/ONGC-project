@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TrackNClassify</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        nav {
+            background-color: #444;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        nav ul li {
+            display: inline;
+            margin: 0 10px;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        #qr-code {
+            margin-top: 20px;
+            
+        }
+        #myImageId{
+            border: 3px solid;
+            padding: 0px;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>TrackNClassify</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
+    <main>
+        <h2>Welcome to our Portal</h2>
+        <p>This is the main page of the website.</p>
+        <button id="generate-qr">
+            <p>Generate New QR code</p>
+        </button>
+        <div id="qr-code"></div>
+    </main>
+    <footer>
+        <p>TrackNClassify</p>
+    </footer>
+
+    <script>
+        document.getElementById('generate-qr').addEventListener('click', function() {
+            fetch('/generate_qr')
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.style.width = '300px';
+                    img.style.height = '300px';
+                    img.id = 'myImageId'; // Assigning an id
+                    document.getElementById('qr-code').innerHTML = '';
+                    document.getElementById('qr-code').appendChild(img);
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+
+</html>

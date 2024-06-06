@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        #video-container {
+            width: 504px;
+            height: 405px;
+            position: relative;
+            margin-top: 20px;
+            border: solid;
+            border-radius: 5px;
+            border-color: black;
+            padding: 10px;
+        }
+        #video {
+            width: 500px;
+            height: 400px;
+            border: 1px solid #ddd;
+            background-color: #333;
+            align-items: center;
+            object-fit: cover;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #333;
+        }
+        #scanButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>QR Code Scanner</h1>
+    <div id="video-container">
+        <img id="video" src="{{ url_for('static', filename='default_image.jpg') }}">
+    </div>
+
+    <div id="result"></div>
+    <button id="scanButton">Scan</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+        const resultElement = document.getElementById('result');
+        const videoContainer = document.getElementById('video-container');
+        const video = document.getElementById('video');
+        const scanButton = document.getElementById('scanButton');
+        let isCameraOn = false;
+
+        scanButton.addEventListener('click', () => {
+            if (!isCameraOn) {
+                startCamera();
+                scanButton.innerText = 'Stop';  // Change button text to 'Stop'
+            } else {
+                stopCamera();
+                scanButton.innerText = 'Scan';  // Change button text to 'Scan'
+            }
+        });
+
+        function startCamera() {
+            fetch('/start_camera')
+                .then(response => {
+                    if (response.ok) {
+                        isCameraOn = true;
+                        video.src = '/start_camera';  // Set the video source to the streaming route
+                        videoContainer.appendChild(video);
+                        socket.emit('scan');  // Start scanning
+                    } else {
+                        console.error('Failed to start camera');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error starting camera:', error);
+                });
+        }
+
+        function stopCamera() {
+            fetch('/stop_camera')
+                .then(response => {
+                    if (response.ok) {
+                        isCameraOn = false;
+                        video.src = '{{ url_for("static", filename="default_image.jpg") }}';  // Reset to default image
+                        
+                    } else {
+                        console.error('Failed to stop camera');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error stopping camera:', error);
+                });
+        }
+
+        socket.on('scan_result', (message) => {
+            resultElement.innerText = message;
+        });
+    </script>
+</body>
+</html>
